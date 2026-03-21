@@ -7,12 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Surya8442/twentyone.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
