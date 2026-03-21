@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "surya8442/myapp:v1"
+        DOCKER_IMAGE = "myapp:v1"
     }
 
     stages {
@@ -19,14 +19,16 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Image to DockerHub') {
             steps {
-                withCredentials([string(credentialsId: 'docker-token', variable: 'TOKEN')]) {
-                    sh "echo $TOKEN | docker login -u surya8442 --password-stdin"
+                withCredentials([usernamePassword(credentialsId: 'Docker_cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                    echo "$PASS" | docker login -u "$USER" --password-stdin
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
-                sh "docker push ${DOCKER_IMAGE}"
             }
-        }
 
         stage('Approval') {
             steps {
