@@ -3,10 +3,17 @@ pipeline {
 
     environment {
         DOCKER_USER = "surya8442"
-        DOCKER_IMAGE = "myapp:v1"
+        IMAGE_NAME = "myapp"
+        IMAGE_TAG = "v1"
     }
 
     stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Surya8442/twentyone.git'
+            }
+        }
 
         stage('Install Dependencies') {
             steps {
@@ -16,32 +23,38 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE} .'
+                sh """
+                    docker build -t ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
+                """
             }
         }
 
-        stage('Push Image to DockerHub') {
+        stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker_cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh '''
-                    echo "$PASS" | docker login -u "$USER" --password-stdin
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
+                withCredentials([string(credentialsId: 'dockerhub_token', variable: 'TOKEN')]) {
+                    sh """
+                        echo $TOKEN | docker login -u ${DOCKER_USER} --password-stdin
+                        docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
                 }
             }
+        }
 
         stage('Approval') {
             steps {
-                input "Deploy to Kubernetes?"
+                script {
+                    input message: "Approve deployment?"
+                }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f deployment.yml'
-                sh 'kubectl apply -f service.yml'
+                sh """
+                    kubectl apply -f deployment.yaml
+                """
             }
         }
-    }
-}
+
+    } // <-- closes stages
+} // <-- closes pipeline
