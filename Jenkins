@@ -9,7 +9,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git '<your-github-repo>'
+                git 'https://github.com/Surya8442/twentyone.git'
             }
         }
 
