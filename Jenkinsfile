@@ -17,7 +17,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh "npm install"
             }
         }
 
@@ -31,12 +31,15 @@ pipeline {
 
         stage('Push Image to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker_cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh '''
-                    echo "$PASS" | docker login -u "$USER" --password-stdin
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'Docker_cred',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh """
+                        echo "${PASS}" | docker login -u "${USER}" --password-stdin
+                        docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
                 }
             }
         }
@@ -51,11 +54,9 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh """
-                    kubectl apply -f deployment.yaml
-                """
+                sh "kubectl apply -f deployment.yaml"
             }
         }
 
-    } // <-- closes stages
-} // <-- closes pipeline
+    }
+}
