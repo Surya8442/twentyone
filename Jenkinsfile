@@ -5,6 +5,8 @@ pipeline {
         DOCKER_USER = "surya8442"
         IMAGE_NAME = "myapp"
         IMAGE_TAG = "v1"
+        CONTAINER_NAME = "myapp-container"
+        APP_PORT = "3000"     // Change port if needed
     }
 
     stages {
@@ -41,6 +43,19 @@ pipeline {
                         docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
                     """
                 }
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh """
+                    docker rm -f ${CONTAINER_NAME} || true
+
+                    docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        -p ${APP_PORT}:${APP_PORT} \
+                        ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                """
             }
         }
 
