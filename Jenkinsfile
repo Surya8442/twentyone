@@ -29,13 +29,14 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Image to DockerHub') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub_token', variable: 'TOKEN')]) {
-                    sh """
-                        echo $TOKEN | docker login -u ${DOCKER_USER} --password-stdin
-                        docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    """
+                withCredentials([usernamePassword(credentialsId: 'Docker_cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                    echo "$PASS" | docker login -u "$USER" --password-stdin
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
             }
         }
