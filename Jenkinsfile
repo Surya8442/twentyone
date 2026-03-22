@@ -67,7 +67,7 @@ pipeline {
                     kubectl get nodes
 
                     kubectl apply -f deployment.yml
-                    kubectl apply -f service.yml
+                    kubectl apply -f Service.yml
                 '''
             }
         }
