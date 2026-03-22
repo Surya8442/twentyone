@@ -18,6 +18,6 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: myapp:v1
+        image: surya8442/myapp:v1
         ports:
         - containerPort: 3000
