@@ -4,7 +4,7 @@ metadata:
   name: myapp-service
 
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: myapp
 
